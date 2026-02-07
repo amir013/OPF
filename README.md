@@ -79,19 +79,60 @@ The input Excel file (`OPFData.xlsx`) should contain three sheets:
 2. **RealAdmittanceMatrix**: Real part of admittance matrix (G)
 3. **ImaginaryAdmittanceMatrix**: Imaginary part of admittance matrix (B)
 
-## Results
+## Verified Results
 
-The solver outputs:
-- Optimal power generation for each bus
-- Voltage magnitudes and angles
-- Reactive power generation
-- Total operating cost
+Both AC and DC OPF have been tested and produce **optimal** solutions.
+
+### AC OPF (NEOS + IPOPT)
+```
+Solver status: optimal
+
+Bus   Pg (MW)     Theta (deg)   |V| (pu)    Qg (MVAr)
+1     1.7116      0.0000        1.0600      -0.0598
+2     -0.0000     -3.9083       1.0423      0.3501
+3     -0.0000     -6.0082       1.0306      0.2944
+4     0.0000      -6.3285       1.0260      0.0000
+5     0.0000      -7.1832       1.0120      0.0000
+
+Total Generation Cost: 45.9622
+```
+
+### DC OPF (HiGHS)
+```
+Solver status: optimal
+
+Bus   Pg (MW)     Theta (deg)
+1     1.6500      0.0000
+2     0.0000      -4.5509
+3     0.0000      -7.0065
+4     0.0000      -7.4321
+5     0.0000      -8.5671
+
+Total Generation Cost: 23.1000
+```
+
+### Summary
+| Metric | AC OPF | DC OPF |
+|--------|--------|--------|
+| Total Load | 1.65 MW | 1.65 MW |
+| Generation Cost | 45.96 | 23.10 |
+| Solver | IPOPT (NEOS) | HiGHS (local) |
+| Status | Optimal | Optimal |
 
 ## Technical Details
 
-- **Slack Bus**: Reference bus with fixed voltage (1.0 p.u.) and angle (0°)
-- **Solver**: Uses NEOS server for optimization (CONOPT for AC, CPLEX for DC)
-- **Units**: Power in MW/MVA, Voltage in per unit (p.u.)
+- **Slack Bus**: Reference bus with fixed voltage (1.06 p.u.) and angle (0°)
+- **AC Solver**: NEOS server with IPOPT for nonlinear optimization
+- **DC Solver**: HiGHS for local linear programming
+- **Units**: Power in MW/MVAr, Voltage in per unit (p.u.)
+- **Test System**: IEEE 5-bus with 7 transmission lines and 3 generators
+
+## Running the Code
+
+```bash
+pip install numpy pyomo highspy
+python opf_corrected.py
+```
 
 ## License
 
