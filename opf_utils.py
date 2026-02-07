@@ -22,9 +22,15 @@ def solve_and_print(model, AC=True):
         solver_manager = pyo.SolverManagerFactory('neos')
         results = solver_manager.solve(model, opt='conopt', tee=True)
     else:
-        # Use local solver for linear DC OPF
-        solver = pyo.SolverFactory('glpk')  # Or 'gurobi', 'cplex'
-        results = solver.solve(model, tee=True)
+        # Try available solvers for linear DC OPF
+        for solver_name in ['glpk', 'cbc', 'appsi_highs']:
+            solver = pyo.SolverFactory(solver_name)
+            if solver.available():
+                print(f"Using solver: {solver_name}")
+                results = solver.solve(model, tee=True)
+                break
+        else:
+            raise RuntimeError("No suitable solver found. Install glpk, cbc, or scipy.")
 
     # Print results
     print("\n\nSolution\n")
